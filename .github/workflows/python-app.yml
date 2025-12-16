@@ -1,0 +1,52 @@
+# .github/workflows/python-app.yml
+
+name: API Integration Tests
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    
+    # 1. Start the API as a service (simulating deployment to a staging environment)
+    services:
+      api:
+        image: python:3.9-slim  # Use a Python base image for our service
+        options: --name api_service  # Give it a name for host lookup
+        ports:
+          - 5000:5000
+        # Entrypoint script to install Flask and start the API
+        entrypoint: /bin/sh -c
+        command: |
+          pip install Flask
+          python api.py
+          
+    steps:
+    # 2. Checkout the repository code
+    - uses: actions/checkout@v4
+      
+    # 3. Install Newman (Node.js tool)
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install Newman
+      run: npm install -g newman
+      
+    # 4. Wait for API to start and run tests
+    - name: Wait for API and Run Newman Tests
+      # Use the container name 'api' as the hostname, and the internal port '5000'
+      run: |
+        # Optional: Wait a few seconds for Flask to fully start
+        sleep 5
+        # Run the Newman tests
+        newman run integration-tests.json \
+        --global-var "base_url=http://api:5000"
+      env:
+        # You may need to set environment variables here if using them in Postman
+        CI_RUN: true
