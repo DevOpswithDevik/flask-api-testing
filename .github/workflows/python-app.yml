@@ -19,34 +19,32 @@ jobs:
         options: --name api_service  # Give it a name for host lookup
         ports:
           - 5000:5000
-        # Entrypoint script to install Flask and start the API
-        entrypoint: /bin/sh -c
-        command: |
-          pip install Flask
-          python api.py
+        
+        # This command installs Flask and runs the API in the background.
+        # It MUST be formatted as a single string for the service to start correctly.
+        command: bash -c "pip install Flask && python api.py"
           
     steps:
     # 2. Checkout the repository code
     - uses: actions/checkout@v4
       
-    # 3. Install Newman (Node.js tool)
+    # 3. Install Node.js
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         
+    # 4. Install Newman (the test runner)
     - name: Install Newman
       run: npm install -g newman
       
-    # 4. Wait for API to start and run tests
+    # 5. Wait for API to start and run tests
     - name: Wait for API and Run Newman Tests
-      # Use the container name 'api' as the hostname, and the internal port '5000'
       run: |
-        # Optional: Wait a few seconds for Flask to fully start
-        sleep 5
-        # Run the Newman tests
+        # Wait a moment for Flask to fully start inside the service container
+        sleep 5 
+        # Run the Newman tests against the service container host 'api'
         newman run integration-tests.json \
-        --global-var "base_url=http://api:5000"
+        --global-var "baseURL=http://api:5000"
       env:
-        # You may need to set environment variables here if using them in Postman
         CI_RUN: true
