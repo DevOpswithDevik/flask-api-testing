@@ -15,21 +15,20 @@ jobs:
     # 1. Start the API as a service (simulating deployment to a staging environment)
     services:
       api:
-        image: python:3.9-slim  # Use a Python base image for our service
+        image: python:3.9-slim  # Use a minimal Python image for the server
         options: --name api_service  # Give it a name for host lookup
         ports:
           - 5000:5000
         
-        # This command installs Flask and runs the API in the background.
-        # It MUST be formatted as a single string for the service to start correctly.
-        command: bash -c "pip install Flask && python api.py"
+        # CORRECT YAML: Use bash -c to run multiple commands in a single string for the service.
+        command: ["bash", "-c", "pip install Flask && python api.py"]
           
     steps:
     # 2. Checkout the repository code
     - uses: actions/checkout@v4
       
     # 3. Install Node.js
-    - name: Install Node.js
+    - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
@@ -44,6 +43,7 @@ jobs:
         # Wait a moment for Flask to fully start inside the service container
         sleep 5 
         # Run the Newman tests against the service container host 'api'
+        # The service name 'api' is the hostname to use inside the workflow.
         newman run integration-tests.json \
         --global-var "baseURL=http://api:5000"
       env:
