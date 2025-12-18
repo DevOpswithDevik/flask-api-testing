@@ -1,0 +1,104 @@
+{
+	"info": {
+		"_postman_id": "1b263929-f2b3-4b16-81f0-78176378f763",
+		"name": "Flask API Integration Tests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50856712",
+		"_collection_link": "https://devopswithdevik-2952878.postman.co/workspace/Devik-Sharma's-Workspace~63b67623-8d25-4c17-80f4-c16825fea5ee/collection/50856712-1b263929-f2b3-4b16-81f0-78176378f763?action=share&source=collection_link&creator=50856712"
+	},
+	"item": [
+		{
+			"name": "Get All Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Check if the server responded with the expected success code (200)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Check if the data structure is correct and has content",
+							"pm.test(\"Response is an array with at least 2 items\", function () {",
+							"    const responseData = pm.response.json();",
+							"    // 1. Check if the body is a JSON array",
+							"    pm.expect(responseData).to.be.an('array');",
+							"    // 2. Check if the array has the initial two items",
+							"    pm.expect(responseData.length).to.be.at.least(2);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{baseURL}}/items",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 (Created)\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test(\"ID is returned\", function () {",
+							"    pm.expect(pm.response.json()).to.have.property('id').that.is.a('number');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"New Test Item\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/items",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"items"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
