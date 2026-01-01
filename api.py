@@ -3,6 +3,9 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
+# WARNING: Insecure practice for testing purposes
+DEBUG_KEY = "admin123"
+
 # Simulating an in-memory database (list of items)
 items = [
     {"id": 1, "name": "Item A", "status": "pending"},

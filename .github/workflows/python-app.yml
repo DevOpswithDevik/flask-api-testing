@@ -62,3 +62,21 @@ jobs:
       uses: grafana/k6-action@v0.3.1
       with:
         filename: performance-test.js
+  
+  security-scan:
+    needs: performance-test # Runs after performance tests pass
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write # Required to upload security results
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: python
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+  
