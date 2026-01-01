@@ -1,6 +1,4 @@
-# .github/workflows/python-app.yml
-
-name: API Integration Tests
+name: API Integration & Performance Tests
 
 on:
   push:
@@ -9,9 +7,9 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
+  # --- JOB 1: Functional Integration Testing ---
   integration-test:
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v4
 
@@ -28,7 +26,7 @@ jobs:
     - name: Start Flask API in Background
       run: |
         python api.py & 
-        sleep 5 # Give the API time to start
+        sleep 5 
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -41,3 +39,26 @@ jobs:
     - name: Run Newman Tests
       run: |
         newman run integration-tests.json --global-var "baseURL=http://127.0.0.1:5000"
+
+  # --- JOB 2: Performance Testing (Task 5) ---
+  performance-test:
+    needs: integration-test # This ensures it runs AFTER Job 1 passes
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Start Flask API
+      run: |
+        pip install Flask
+        python api.py &
+        sleep 5
+
+    - name: Run k6 Load Test
+      uses: grafana/k6-action@v0.3.1
+      with:
+        filename: performance-test.js
